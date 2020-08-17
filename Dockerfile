@@ -20,18 +20,27 @@
 # - https://registry.hub.docker.com/u/nishigori/rpmbuild
 # - https://registry.hub.docker.com/u/sydneyuni/rpm-build-env/
 
-FROM centos:7
+FROM centos:6
 MAINTAINER jitakirin <jitakirin@gmail.com>
 
+
+RUN yum install -y rpm-build vim wget
+RUN wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
+RUN yum install -y devtoolset-2-gcc devtoolset-2-binutils devtoolset-2-gcc-c++
+RUN yum groupinstall -y 'Development Tools'
+RUN yum install -y readline-devel zlib-devel epel-release
+
 RUN yum install -y rpmdevtools yum-utils && \
-    yum clean all && \
-    rm -r -f /var/cache/*
-ADD docker-init.sh docker-rpm-build.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-*.sh
+  yum clean all && \
+  rm -r -f /var/cache/*
 
 RUN useradd rpmbuild
 USER rpmbuild
 RUN rpmdev-setuptree
 USER root
 
-ENTRYPOINT ["/usr/local/bin/docker-init.sh"]
+ADD docker-init.sh docker-rpm-build.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-*.sh
+
+# ENTRYPOINT ["/usr/local/bin/docker-init.sh"]
+ENTRYPOINT [ "/bin/bash" ]
